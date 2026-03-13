@@ -9,3 +9,32 @@ html {
 body {
   @apply bg-white text-[#3A3A3A];
 }
+
+/* React Calendar Styling */
+.react-calendar {
+  border: 1px solid #01BD70 !important;
+  border-radius: 8px !important;
+  font-family: inherit !important;
+}
+
+.react-calendar__tile {
+  color: #3A3A3A !important;
+}
+
+.react-calendar__tile:hover {
+  background-color: #01BD70 !important;
+  color: white !important;
+}
+
+.react-calendar__tile--active {
+  background-color: #01BD70 !important;
+  color: white !important;
+}
+
+.react-calendar__navigation button {
+  color: #3A3A3A !important;
+}
+
+.react-calendar__navigation button:hover {
+  background-color: #F4F5F6 !important;
+}

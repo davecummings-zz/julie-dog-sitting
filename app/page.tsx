@@ -2,11 +2,21 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 import { services, reviews } from '@/lib/services'
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
+  const [images, setImages] = useState<string[]>([])
+  const [imagesToShow, setImagesToShow] = useState(12) // 3 rows of 4 columns
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
+  const reviewsRef = useRef<HTMLDivElement>(null)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [dateAvailability, setDateAvailability] = useState<Record<string, Record<string, boolean>>>({})
   const [availability, setAvailability] = useState({
     boarding: true,
     dropIn: true,
@@ -14,13 +24,66 @@ export default function Home() {
     walking: true,
   })
 
+  // Get availability for selected date
+  const getDateKey = (date: Date) => {
+    return date.toISOString().split('T')[0]
+  }
+
+  const currentDateKey = getDateKey(selectedDate)
+  const dateAvailabilityData = dateAvailability[currentDateKey] || {
+    boarding: true,
+    dropIn: true,
+    daycare: true,
+    walking: true,
+  }
+
+  // Fetch dog images from API
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch('/api/dogs')
+        const data = await response.json()
+        setImages(data.images || [])
+      } catch (error) {
+        console.error('Failed to fetch images:', error)
+      }
+    }
+    fetchImages()
+  }, [])
+
+  // Reviews carousel scroll functions
+  const scrollReviews = (direction: 'left' | 'right') => {
+    const container = reviewsRef.current
+    if (!container) return
+    const scrollAmount = 400
+    if (direction === 'left') {
+      container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
+    } else {
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setTouchEnd(e.changedTouches[0].clientX)
+    if (!reviewsRef.current) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+    if (isLeftSwipe) scrollReviews('right')
+    if (isRightSwipe) scrollReviews('left')
+  }
+
   return (
     <main className="w-full">
       {/* Hero Section */}
       <section 
         className="w-full bg-cover bg-no-repeat py-20 md:py-32 px-4 relative"
         style={{
-          backgroundImage: 'url(/images/dogs/21.webp)',
+          backgroundImage: 'url(/images/hero.webp)',
           backgroundPosition: 'bottom',
         }}
       >
@@ -116,38 +179,70 @@ export default function Home() {
       {/* Services & Pricing Section */}
       <section className="py-20 md:py-32 bg-lightGray px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">Services & Pricing</h2>
-          <p className="text-center text-[#6B7280] mb-12 max-w-2xl mx-auto">
-            Flexible pet care options to meet your needs
-          </p>
-
-          {/* Availability Toggle */}
+          {/* Availability Calendar & Toggle */}
           <div className="mb-12 bg-white p-6 rounded-lg shadow">
-            <h3 className="font-bold text-[#3A3A3A] mb-4 uppercase">Current Availability</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <h3 className="font-bold text-[#3A3A3A] mb-6 uppercase">Availability Calendar</h3>
+            
+            {/* Selected Date Display */}
+            <div className="text-center mb-6 p-4 bg-lightGray rounded">
+              <p className="text-[#3A3A3A] font-bold uppercase">
+                {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+
+            {/* Availability for Selected Date */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
                 { key: 'boarding', label: 'Boarding' },
                 { key: 'dropIn', label: 'Drop-in Visits' },
                 { key: 'daycare', label: 'Day Care' },
                 { key: 'walking', label: 'Walking' },
-              ].map((service) => (
-                <button
-                  key={service.key}
-                  onClick={() => setAvailability(prev => ({ ...prev, [service.key]: !prev[service.key as keyof typeof availability] }))}
-                  className={`p-4 rounded-lg font-bold transition text-center uppercase ${
-                    availability[service.key as keyof typeof availability]
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-300 text-gray-600'
-                  }`}
-                >
-                  {service.label}
-                  <div className="text-sm mt-1">
-                    {availability[service.key as keyof typeof availability] ? '✓ Available' : 'Booked'}
-                  </div>
-                </button>
-              ))}
+              ].map((service) => {
+                const isAvailable = dateAvailabilityData[service.key as keyof typeof dateAvailabilityData]
+                return (
+                  <button
+                    key={service.key}
+                    onClick={() => {
+                      setDateAvailability(prev => ({
+                        ...prev,
+                        [currentDateKey]: {
+                          ...prev[currentDateKey],
+                          [service.key]: !isAvailable
+                        }
+                      }))
+                    }}
+                    className={`p-4 rounded-lg font-bold transition text-center uppercase ${
+                      isAvailable
+                        ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
+                        : 'bg-gray-300 text-gray-600 hover:bg-gray-400 cursor-pointer'
+                    }`}
+                  >
+                    {service.label}
+                    <div className="text-sm mt-1">
+                      {isAvailable ? '✓ Available' : '✗ Booked'}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Calendar */}
+            <div className="flex justify-center mt-8">
+              <div className="w-full md:w-auto [&_.react-calendar]:border-[1px] [&_.react-calendar]:border-[#01BD70] [&_.react-calendar]:rounded-lg [&_.react-calendar_button]:text-[#3A3A3A] [&_.react-calendar_button:hover]:bg-[#01BD70] [&_.react-calendar_button:hover]:text-white [&_.react-calendar_button.react-calendar__tile--active]:bg-[#01BD70] [&_.react-calendar_button.react-calendar__tile--active]:text-white">
+                <Calendar 
+                  value={selectedDate} 
+                  onChange={(value) => setSelectedDate(value as Date)}
+                  minDate={new Date()}
+                />
+              </div>
             </div>
           </div>
+
+          {/* Services & Pricing Header */}
+          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">Services & Pricing</h2>
+          <p className="text-center text-[#6B7280] mb-12 max-w-2xl mx-auto">
+            Flexible pet care options to meet your needs
+          </p>
 
           {/* Pricing Table */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -188,18 +283,15 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             Dogs We've Loved
           </h2>
-          <p className="text-center text-[#6B7280] mb-12 max-w-2xl mx-auto">
-            Meet some of the wonderful pups Julie has cared for. Upload up to 125 photos to this gallery!
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 21 }).map((_, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            {images.slice(0, imagesToShow).map((image, i) => (
               <div 
-                key={i} 
-                onClick={() => setSelectedImage(i + 1)}
+                key={image} 
+                onClick={() => setSelectedImage(images.indexOf(image))}
                 className="aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer"
               >
                 <Image
-                  src={`/images/dogs/${i + 1}.webp`}
+                  src={`/images/dogs/${image}`}
                   alt={`Dog photo ${i + 1}`}
                   width={300}
                   height={300}
@@ -210,8 +302,18 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Load More Button */}
+          {imagesToShow < images.length && (
+            <button
+              onClick={() => setImagesToShow(prev => prev + 12)}
+              className="block mx-auto px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase mb-4"
+            >
+              Load More
+            </button>
+          )}
+
           {/* Lightbox Modal */}
-          {selectedImage && (
+          {selectedImage !== null && images.length > 0 && (
             <div 
               onClick={() => setSelectedImage(null)}
               className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
@@ -220,15 +322,43 @@ export default function Home() {
                 onClick={(e) => e.stopPropagation()}
                 className="relative bg-black rounded-lg max-w-4xl max-h-[90vh] flex items-center justify-center"
               >
+                {/* Close Button */}
                 <button
                   onClick={() => setSelectedImage(null)}
                   className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition z-10"
                 >
                   ✕
                 </button>
+
+                {/* Previous Button */}
+                {selectedImage > 0 && (
+                  <button
+                    onClick={() => setSelectedImage(selectedImage - 1)}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition z-10 bg-black/50 hover:bg-black/70 px-3 py-2 rounded"
+                  >
+                    ‹
+                  </button>
+                )}
+
+                {/* Next Button */}
+                {selectedImage < images.length - 1 && (
+                  <button
+                    onClick={() => setSelectedImage(selectedImage + 1)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition z-10 bg-black/50 hover:bg-black/70 px-3 py-2 rounded"
+                  >
+                    ›
+                  </button>
+                )}
+
+                {/* Image Counter */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/70 px-4 py-2 rounded">
+                  {selectedImage + 1} / {images.length}
+                </div>
+
+                {/* Image */}
                 <Image
-                  src={`/images/dogs/${selectedImage}.webp`}
-                  alt={`Dog photo ${selectedImage}`}
+                  src={`/images/dogs/${images[selectedImage]}`}
+                  alt={`Dog photo ${selectedImage + 1}`}
                   width={1200}
                   height={1200}
                   className="w-full h-full object-contain"
@@ -237,9 +367,7 @@ export default function Home() {
               </div>
             </div>
           )}
-          <p className="text-center text-[#6B7280] mt-8 italic">
-            {21} beautiful pups! Space for up to 104 more photos.
-          </p>
+
         </div>
       </section>
 
@@ -320,19 +448,51 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             What Pet Parents Say
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {reviews.slice(0, 9).map((review) => (
-              <div key={review.id} className="bg-lightGray p-6 rounded-lg shadow">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 className="font-bold text-[#3A3A3A]">{review.name}</h4>
-                    <p className="text-sm text-[#6B7280]">{review.service} • {review.date}</p>
+          {/* Reviews Carousel */}
+          <div className="relative mb-12">
+            {/* Scroll Container */}
+            <div
+              ref={reviewsRef}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              className="flex gap-6 overflow-x-auto scroll-smooth pb-4 md:pb-0"
+              style={{ scrollBehavior: 'smooth' }}
+            >
+              {reviews.map((review) => (
+                <div 
+                  key={review.id} 
+                  className="flex-shrink-0 w-full sm:w-96 bg-lightGray p-6 rounded-lg shadow"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-bold text-[#3A3A3A]">{review.name}</h4>
+                      <p className="text-sm text-[#6B7280]">{review.service} • {review.date}</p>
+                    </div>
+                    <div className="text-lg">⭐⭐⭐⭐⭐</div>
                   </div>
-                  <div className="text-lg">⭐⭐⭐⭐⭐</div>
+                  <p className="text-[#6B7280] italic">"{review.text}"</p>
                 </div>
-                <p className="text-[#6B7280] italic">"{review.text}"</p>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Navigation Arrows (Desktop) */}
+            <button
+              onClick={() => scrollReviews('left')}
+              className="hidden md:flex absolute -left-16 top-1/2 transform -translate-y-1/2 bg-[#01BD70] hover:bg-[#00a85f] text-white rounded-full w-12 h-12 items-center justify-center transition"
+            >
+              ‹
+            </button>
+            <button
+              onClick={() => scrollReviews('right')}
+              className="hidden md:flex absolute -right-16 top-1/2 transform -translate-y-1/2 bg-[#01BD70] hover:bg-[#00a85f] text-white rounded-full w-12 h-12 items-center justify-center transition"
+            >
+              ›
+            </button>
+
+            {/* Mobile Swipe Hint */}
+            <p className="text-center text-sm text-[#6B7280] mt-4 md:hidden italic">
+              👉 Swipe left or right to see more reviews
+            </p>
           </div>
           <button
             onClick={() => document.getElementById('submit-review')?.scrollIntoView({ behavior: 'smooth' })}
@@ -466,16 +626,26 @@ export default function Home() {
       {/* Map Section */}
       <section className="py-20 md:py-32 bg-white px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
+          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">
             Location
           </h2>
-          <div className="w-full h-96 bg-gradient-to-br lightGray rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl mb-4">📍</div>
-              <p className="text-xl font-bold text-[#3A3A3A]">Georgetown, Massachusetts</p>
-              <p className="text-[#6B7280] mt-2">Map integration coming soon</p>
-            </div>
+          <p className="text-center text-[#6B7280] mb-12 max-w-2xl mx-auto">
+            Service area centered in Georgetown, Massachusetts. Exact address provided upon booking.
+          </p>
+          <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg">
+            <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2972.8326509949316!2d-71.13944!3d42.39583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e372a0e0e0e0e1%3A0x0!2sGeorgetown%2C%20Massachusetts!5e0!3m2!1sen!2sus!4v1234567890"
+            />
           </div>
+          <p className="text-center text-sm text-[#6B7280] mt-6 italic">
+            📍 Georgetown, Massachusetts — For privacy, exact address is shared with confirmed bookings only.
+          </p>
         </div>
       </section>
     </main>
