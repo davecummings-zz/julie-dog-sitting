@@ -6,6 +6,8 @@ import { useState, useEffect, useRef } from 'react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { services, reviews } from '@/lib/services'
+import { WalkingIcon } from '@/components/Icons'
+import Navigation from '@/components/Navigation'
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
@@ -138,6 +140,7 @@ export default function Home() {
 
   return (
     <main className="w-full">
+      <Navigation />
       {/* Hero Section */}
       <section 
         className="w-full bg-cover bg-no-repeat py-20 px-4 relative"
@@ -170,51 +173,70 @@ export default function Home() {
       </section>
 
       {/* About Julie Section */}
-      <section className="py-20 bg-white px-4">
-        <div className="max-w-6xl mx-auto">
+      <section id="about" className="py-20 bg-white px-4">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">About Julie</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">
-                Responsive, Reliable Pet Care
-              </h3>
-              <p className="text-lg text-[#6B7280] mb-4 leading-relaxed">
-                Julie is a responsive sitter who delivers highly rated care and has a history of listing accurate availability and preferences, making it easier for pet parents to find the best care for their pets.
-              </p>
-              <p className="text-lg text-[#6B7280] mb-6 leading-relaxed">
-                <strong className="text-[#3A3A3A]">Fresh air, long walks and attention</strong> are the foundation of our care philosophy. We've been caring for pets for years, and it's been a joy for our whole family.
-              </p>
+          
+          {/* Julie's Photo - Centered */}
+          <div className="flex justify-center mb-12">
+            <div className="max-w-sm rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src="/images/julie.webp"
+                alt="Julie - Dog Sitter"
+                width={300}
+                height={400}
+                className="h-auto object-cover"
+                priority
+              />
+            </div>
+          </div>
 
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-bold text-[#3A3A3A] mb-2">📞 Communication</h4>
-                  <ul className="text-[#6B7280] space-y-1">
-                    <li>✓ 7 repeat pet parents</li>
-                    <li>✓ 100% response rate</li>
-                    <li>✓ Usually responds in under an hour</li>
-                    <li>✓ 80% bookings with photo updates</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#3A3A3A] mb-2">🎯 Skills</h4>
-                  <ul className="text-[#6B7280] space-y-1">
-                    <li>✓ 4 years of experience</li>
-                    <li>✓ Oral medication administration</li>
-                    <li>✓ Provides daily exercise</li>
-                    <li>✓ Special needs accommodation</li>
-                  </ul>
-                </div>
+          {/* Centered Text */}
+          <div className="text-center mb-12 max-w-3xl mx-auto">
+            <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">
+              Responsive, Reliable Pet Care
+            </h3>
+            <p className="text-lg text-[#6B7280] mb-4 leading-relaxed">
+              Julie is a responsive sitter who delivers highly rated care and has a history of listing accurate availability and preferences, making it easier for pet parents to find the best care for their pets.
+            </p>
+            <p className="text-lg text-[#6B7280] leading-relaxed">
+              <strong className="text-[#3A3A3A]">Fresh air, long walks and attention</strong> are the foundation of our care philosophy. We've been caring for pets for years, and it's been a joy for our whole family.
+            </p>
+          </div>
+
+          {/* Communication & Skills + Typical Day */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column: Communication & Skills */}
+            <div className="space-y-6">
+              <div className="bg-lightGray p-6 rounded-lg">
+                <h4 className="text-lg font-bold text-[#3A3A3A] mb-4 uppercase">📞 Communication</h4>
+                <ul className="text-[#6B7280] space-y-2">
+                  <li>✓ 7 repeat pet parents</li>
+                  <li>✓ 100% response rate</li>
+                  <li>✓ Usually responds in under an hour</li>
+                  <li>✓ 80% bookings with photo updates</li>
+                </ul>
+              </div>
+              <div className="bg-lightGray p-6 rounded-lg">
+                <h4 className="text-lg font-bold text-[#3A3A3A] mb-4 uppercase">🎯 Skills</h4>
+                <ul className="text-[#6B7280] space-y-2">
+                  <li>✓ 4 years of experience</li>
+                  <li>✓ Oral medication administration</li>
+                  <li>✓ Provides daily exercise</li>
+                  <li>✓ Special needs accommodation</li>
+                </ul>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br lightGray p-8 rounded-lg">
+            {/* Right Column: Typical Day */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-lg border-l-4 border-[#01BD70]">
               <h3 className="text-xl font-bold text-[#3A3A3A] mb-6 uppercase">A Typical Day</h3>
               <p className="text-[#6B7280] leading-relaxed mb-6">
                 When your dog is here, your dog is family. Days are filled with:
               </p>
               <ul className="space-y-3 text-[#6B7280]">
                 <li className="flex gap-3">
-                  <span className="text-[#01BD70] font-bold">🚶</span>
+                  <WalkingIcon className="flex-shrink-0 w-6 h-6" size={24} />
                   <span>Walks around the block and in the nature preserve behind our home</span>
                 </li>
                 <li className="flex gap-3">
@@ -235,7 +257,7 @@ export default function Home() {
         </div>
       </section>
         
-      <section className="py-20 bg-lightGray px-4">
+      <section id="availability" className="py-20 bg-lightGray px-4">
 
         <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">Calendar Availability</h2>
 
@@ -311,6 +333,7 @@ export default function Home() {
             >
               Book Now
             </button>
+            <div id="services"></div>
           </div>
 
           {/* Services & Pricing Header */}
@@ -353,7 +376,7 @@ export default function Home() {
       </section>
 
       {/* Photo Gallery Section */}
-      <section className="py-20 bg-white px-4">
+      <section id="gallery" className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             Dogs We've Loved
@@ -447,7 +470,7 @@ export default function Home() {
       </section>
 
       {/* Home & Environment Section */}
-      <section className="py-20 bg-lightGray px-4">
+      <section id="pet-care" className="py-20 bg-lightGray px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             Safety, Trust & Environment
@@ -518,7 +541,7 @@ export default function Home() {
       </section>
 
       {/* Reviews Section */}
-      <section className="py-20 bg-white px-4">
+      <section id="reviews" className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             What Pet Parents Say
@@ -701,7 +724,7 @@ export default function Home() {
       </section>
 
       {/* Map Section */}
-      <section className="py-20 bg-white px-4">
+      <section id="location" className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">
             Location
