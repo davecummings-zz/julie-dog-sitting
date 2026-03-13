@@ -16,7 +16,57 @@ export default function Home() {
   const [touchEnd, setTouchEnd] = useState(0)
   const reviewsRef = useRef<HTMLDivElement>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [dateAvailability, setDateAvailability] = useState<Record<string, Record<string, boolean>>>({})
+  
+  // Initialize availability data for March through December and beyond
+  const initializeAvailability = () => {
+    const availability: Record<string, Record<string, boolean>> = {}
+    const serviceDefaults = { boarding: true, dropIn: true, daycare: true, walking: true }
+    
+    // March: 12-31 available, except 18-19
+    for (let day = 12; day <= 31; day++) {
+      const dateStr = `2026-03-${String(day).padStart(2, '0')}`
+      availability[dateStr] = {
+        ...serviceDefaults,
+        // 18th and 19th are booked (false)
+        ...(day >= 18 && day <= 19 ? { boarding: false, dropIn: false, daycare: false, walking: false } : {})
+      }
+    }
+    
+    // April: All available except 18-25
+    for (let day = 1; day <= 30; day++) {
+      const dateStr = `2026-04-${String(day).padStart(2, '0')}`
+      availability[dateStr] = {
+        ...serviceDefaults,
+        // 18th-25th are booked (false)
+        ...(day >= 18 && day <= 25 ? { boarding: false, dropIn: false, daycare: false, walking: false } : {})
+      }
+    }
+    
+    // May: All available
+    for (let day = 1; day <= 31; day++) {
+      const dateStr = `2026-05-${String(day).padStart(2, '0')}`
+      availability[dateStr] = serviceDefaults
+    }
+    
+    // June: All available
+    for (let day = 1; day <= 30; day++) {
+      const dateStr = `2026-06-${String(day).padStart(2, '0')}`
+      availability[dateStr] = serviceDefaults
+    }
+    
+    // July through December: All available
+    const monthDays = { 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31 }
+    for (const [month, days] of Object.entries(monthDays)) {
+      for (let day = 1; day <= days; day++) {
+        const dateStr = `2026-${String(parseInt(month)).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+        availability[dateStr] = serviceDefaults
+      }
+    }
+    
+    return availability
+  }
+
+  const [dateAvailability, setDateAvailability] = useState<Record<string, Record<string, boolean>>>(initializeAvailability())
   const [availability, setAvailability] = useState({
     boarding: true,
     dropIn: true,
@@ -55,7 +105,16 @@ export default function Home() {
   const scrollReviews = (direction: 'left' | 'right') => {
     const container = reviewsRef.current
     if (!container) return
-    const scrollAmount = 400
+    
+    // Get the first review card to calculate its width
+    const firstCard = container.querySelector('div[class*="flex-shrink-0"]') as HTMLElement
+    if (!firstCard) return
+    
+    // Calculate scroll distance: card width + gap (gap-6 = 1.5rem = 24px)
+    const cardWidth = firstCard.offsetWidth
+    const gap = 24 // gap-6 = 1.5rem = 24px
+    const scrollAmount = cardWidth + gap
+    
     if (direction === 'left') {
       container.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
     } else {
@@ -81,7 +140,7 @@ export default function Home() {
     <main className="w-full">
       {/* Hero Section */}
       <section 
-        className="w-full bg-cover bg-no-repeat py-20 md:py-32 px-4 relative"
+        className="w-full bg-cover bg-no-repeat py-20 px-4 relative"
         style={{
           backgroundImage: 'url(/images/hero.webp)',
           backgroundPosition: 'bottom',
@@ -111,7 +170,7 @@ export default function Home() {
       </section>
 
       {/* About Julie Section */}
-      <section className="py-20 md:py-32 bg-white px-4">
+      <section className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">About Julie</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -175,13 +234,14 @@ export default function Home() {
           </div>
         </div>
       </section>
+        
+      <section className="py-20 bg-lightGray px-4">
 
-      {/* Services & Pricing Section */}
-      <section className="py-20 md:py-32 bg-lightGray px-4">
+        <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">Calendar Availability</h2>
+
         <div className="max-w-6xl mx-auto">
           {/* Availability Calendar & Toggle */}
-          <div className="mb-12 bg-white p-6 rounded-lg shadow">
-            <h3 className="font-bold text-[#3A3A3A] mb-6 uppercase">Availability Calendar</h3>
+          <div className="mb-20 bg-white p-6 rounded-lg shadow">
             
             {/* Selected Date Display */}
             <div className="text-center mb-6 p-4 bg-lightGray rounded">
@@ -200,42 +260,57 @@ export default function Home() {
               ].map((service) => {
                 const isAvailable = dateAvailabilityData[service.key as keyof typeof dateAvailabilityData]
                 return (
-                  <button
+                  <div
                     key={service.key}
-                    onClick={() => {
-                      setDateAvailability(prev => ({
-                        ...prev,
-                        [currentDateKey]: {
-                          ...prev[currentDateKey],
-                          [service.key]: !isAvailable
-                        }
-                      }))
-                    }}
-                    className={`p-4 rounded-lg font-bold transition text-center uppercase ${
+                    className={`p-4 rounded-lg font-bold text-center uppercase cursor-default ${
                       isAvailable
-                        ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
-                        : 'bg-gray-300 text-gray-600 hover:bg-gray-400 cursor-pointer'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-300 text-gray-600'
                     }`}
                   >
                     {service.label}
                     <div className="text-sm mt-1">
                       {isAvailable ? '✓ Available' : '✗ Booked'}
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>
 
             {/* Calendar */}
             <div className="flex justify-center mt-8">
-              <div className="w-full md:w-auto [&_.react-calendar]:border-[1px] [&_.react-calendar]:border-[#01BD70] [&_.react-calendar]:rounded-lg [&_.react-calendar_button]:text-[#3A3A3A] [&_.react-calendar_button:hover]:bg-[#01BD70] [&_.react-calendar_button:hover]:text-white [&_.react-calendar_button.react-calendar__tile--active]:bg-[#01BD70] [&_.react-calendar_button.react-calendar__tile--active]:text-white">
+              <div className="w-full md:w-auto [&_.react-calendar]:border-[1px] [&_.react-calendar]:border-[#01BD70] [&_.react-calendar]:rounded-lg [&_.react-calendar_button]:text-[#3A3A3A] [&_.react-calendar_button:hover]:text-white">
                 <Calendar 
                   value={selectedDate} 
                   onChange={(value) => setSelectedDate(value as Date)}
                   minDate={new Date()}
+                  tileClassName={({ date }) => {
+                    const dateStr = getDateKey(date)
+                    const isSelected = date.toDateString() === selectedDate.toDateString()
+                    const dateData = dateAvailability[dateStr]
+                    const isAvailable = dateData ? Object.values(dateData).some(v => v) : false
+                    const isPast = date < new Date() && date.toDateString() !== new Date().toDateString()
+                    
+                    if (isSelected) {
+                      return 'bg-yellow-400 text-[#3A3A3A] font-bold'
+                    } else if (isAvailable) {
+                      return 'bg-green-500 text-white'
+                    } else if (isPast) {
+                      return 'bg-gray-400 text-[#3A3A3A] solid-unavailable'
+                    } else {
+                      return 'bg-lightGray text-[#6B7280] striped-unavailable'
+                    }
+                  }}
                 />
               </div>
             </div>
+            {/* Book Now Button */}
+            <button
+              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+              className="block mx-auto px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase mt-4"
+            >
+              Book Now
+            </button>
           </div>
 
           {/* Services & Pricing Header */}
@@ -278,7 +353,7 @@ export default function Home() {
       </section>
 
       {/* Photo Gallery Section */}
-      <section className="py-20 md:py-32 bg-white px-4">
+      <section className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             Dogs We've Loved
@@ -372,7 +447,7 @@ export default function Home() {
       </section>
 
       {/* Home & Environment Section */}
-      <section className="py-20 md:py-32 bg-lightGray px-4">
+      <section className="py-20 bg-lightGray px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             Safety, Trust & Environment
@@ -443,7 +518,7 @@ export default function Home() {
       </section>
 
       {/* Reviews Section */}
-      <section className="py-20 md:py-32 bg-white px-4">
+      <section className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             What Pet Parents Say
@@ -455,8 +530,8 @@ export default function Home() {
               ref={reviewsRef}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
-              className="flex gap-6 overflow-x-auto scroll-smooth pb-4 md:pb-0"
-              style={{ scrollBehavior: 'smooth' }}
+              className="flex gap-6 overflow-x-auto scroll-smooth pb-4 md:pb-0 scrollbar-hide"
+              style={{ scrollBehavior: 'smooth', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {reviews.map((review) => (
                 <div 
@@ -475,19 +550,21 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Navigation Arrows (Desktop) */}
-            <button
-              onClick={() => scrollReviews('left')}
-              className="hidden md:flex absolute -left-16 top-1/2 transform -translate-y-1/2 bg-[#01BD70] hover:bg-[#00a85f] text-white rounded-full w-12 h-12 items-center justify-center transition"
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => scrollReviews('right')}
-              className="hidden md:flex absolute -right-16 top-1/2 transform -translate-y-1/2 bg-[#01BD70] hover:bg-[#00a85f] text-white rounded-full w-12 h-12 items-center justify-center transition"
-            >
-              ›
-            </button>
+            {/* Navigation Buttons Below */}
+            <div className="flex justify-center gap-4 mt-8">
+              <button
+                onClick={() => scrollReviews('left')}
+                className="px-6 py-2 bg-[#01BD70] hover:bg-[#00a85f] text-white font-bold rounded transition uppercase"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => scrollReviews('right')}
+                className="px-6 py-2 bg-[#01BD70] hover:bg-[#00a85f] text-white font-bold rounded transition uppercase"
+              >
+                Next →
+              </button>
+            </div>
 
             {/* Mobile Swipe Hint */}
             <p className="text-center text-sm text-[#6B7280] mt-4 md:hidden italic">
@@ -504,7 +581,7 @@ export default function Home() {
       </section>
 
       {/* Contact & Review Submission Section */}
-      <section id="contact" className="py-20 md:py-32 bg-lightGray px-4">
+      <section id="contact" className="py-20 bg-lightGray px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
             Get in Touch
@@ -624,7 +701,7 @@ export default function Home() {
       </section>
 
       {/* Map Section */}
-      <section className="py-20 md:py-32 bg-white px-4">
+      <section className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">
             Location
