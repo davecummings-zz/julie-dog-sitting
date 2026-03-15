@@ -117,7 +117,7 @@ export default function Home() {
 
       if (response.ok) {
         setContactMessage('✅ Inquiry sent! Julie will contact you soon.')
-        setContactForm({ name: '', email: '', phone: '', message: '' })
+        setContactForm({ name: '', email: '', phone: '', service: 'Boarding', message: '' })
       } else {
         setContactMessage('❌ Error sending inquiry. Please try again.')
       }
@@ -146,7 +146,7 @@ export default function Home() {
 
       if (response.ok) {
         setReviewMessage('✅ Review submitted! Thank you for your feedback.')
-        setReviewForm({ name: '', email: '', rating: '5', review: '' })
+        setReviewForm({ name: '', email: '', rating: '5', service: 'Boarding', review: '' })
       } else {
         setReviewMessage('❌ Error submitting review. Please try again.')
       }
