@@ -201,13 +201,13 @@ export const reviews = [
     rating: 5,
     approved: true,
   },
-  {
-    id: 17,
-    name: 'Submitted Review',
-    service: 'Pending Approval',
-    date: 'Pending',
-    text: 'Pending owner approval',
-    rating: 0,
-    approved: false,
-  },
+  // {
+  //   id: 17,
+  //   name: 'Submitted Review',
+  //   service: 'Pending Approval',
+  //   date: 'Pending',
+  //   text: 'Pending owner approval',
+  //   rating: 0,
+  //   approved: false,
+  // },
 ]

@@ -77,6 +77,84 @@ export default function Home() {
   })
 
   const [showCancellationModal, setShowCancellationModal] = useState(false)
+  
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  })
+  const [contactLoading, setContactLoading] = useState(false)
+  const [contactMessage, setContactMessage] = useState('')
+
+  // Review form state
+  const [reviewForm, setReviewForm] = useState({
+    name: '',
+    email: '',
+    rating: '5',
+    review: '',
+  })
+  const [reviewLoading, setReviewLoading] = useState(false)
+  const [reviewMessage, setReviewMessage] = useState('')
+
+  // Handle contact form submission
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setContactLoading(true)
+    setContactMessage('')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setContactMessage('✅ Inquiry sent! Julie will contact you soon.')
+        setContactForm({ name: '', email: '', phone: '', message: '' })
+      } else {
+        setContactMessage('❌ Error sending inquiry. Please try again.')
+      }
+    } catch (error) {
+      setContactMessage('❌ Error sending inquiry. Please try again.')
+      console.error('Contact form error:', error)
+    } finally {
+      setContactLoading(false)
+    }
+  }
+
+  // Handle review form submission
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setReviewLoading(true)
+    setReviewMessage('')
+
+    try {
+      const response = await fetch('/api/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewForm),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setReviewMessage('✅ Review submitted! Thank you for your feedback.')
+        setReviewForm({ name: '', email: '', rating: '5', review: '' })
+      } else {
+        setReviewMessage('❌ Error submitting review. Please try again.')
+      }
+    } catch (error) {
+      setReviewMessage('❌ Error submitting review. Please try again.')
+      console.error('Review form error:', error)
+    } finally {
+      setReviewLoading(false)
+    }
+  }
 
   // Get availability for selected date
   const getDateKey = (date: Date) => {
@@ -635,11 +713,14 @@ export default function Home() {
             {/* Contact Form */}
             <div className="bg-white p-8 rounded-lg shadow">
               <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">Book a Service</h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleContactSubmit}>
                 <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Your Name</label>
                   <input
                     type="text"
+                    required
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                     className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
                     placeholder="Your name"
                   />
@@ -648,32 +729,44 @@ export default function Home() {
                   <label className="block text-[#3A3A3A] font-bold mb-2">Email</label>
                   <input
                     type="email"
+                    required
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                     className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
                     placeholder="your@email.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#3A3A3A] font-bold mb-2">Service</label>
-                  <select className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]">
-                    <option>Select a service</option>
-                    <option>Boarding</option>
-                    <option>Drop-in Visits</option>
-                    <option>Day Care</option>
-                    <option>Dog Walking</option>
-                  </select>
+                  <label className="block text-[#3A3A3A] font-bold mb-2">Phone (Optional)</label>
+                  <input
+                    type="tel"
+                    value={contactForm.phone}
+                    onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
+                    placeholder="(555) 123-4567"
+                  />
                 </div>
                 <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Message</label>
                   <textarea
+                    required
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                     className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70] h-32"
                     placeholder="Tell Julie about your dog and what you need..."
                   />
                 </div>
+                {contactMessage && (
+                  <p className={`text-center font-semibold ${contactMessage.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                    {contactMessage}
+                  </p>
+                )}
                 <button
                   type="submit"
-                  className="w-full px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase"
+                  disabled={contactLoading}
+                  className="w-full px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Inquiry
+                  {contactLoading ? 'Sending...' : 'Send Inquiry'}
                 </button>
                 <button
                   type="button"
@@ -688,32 +781,28 @@ export default function Home() {
             {/* Review Submission */}
             <div id="submit-review" className="bg-white p-8 rounded-lg shadow">
               <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">Leave a Review</h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleReviewSubmit}>
                 <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Your Name</label>
                   <input
                     type="text"
+                    required
+                    value={reviewForm.name}
+                    onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
                     className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
                     placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#3A3A3A] font-bold mb-2">Your Dog's Name</label>
+                  <label className="block text-[#3A3A3A] font-bold mb-2">Email</label>
                   <input
-                    type="text"
+                    type="email"
+                    required
+                    value={reviewForm.email}
+                    onChange={(e) => setReviewForm({ ...reviewForm, email: e.target.value })}
                     className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
-                    placeholder="Dog's name"
+                    placeholder="your@email.com"
                   />
-                </div>
-                <div>
-                  <label className="block text-[#3A3A3A] font-bold mb-2">Service Type</label>
-                  <select className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]">
-                    <option>Select service</option>
-                    <option>Boarding</option>
-                    <option>Drop-in Visits</option>
-                    <option>Day Care</option>
-                    <option>Dog Walking</option>
-                  </select>
                 </div>
                 <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Rating</label>
@@ -722,7 +811,10 @@ export default function Home() {
                       <button
                         key={star}
                         type="button"
-                        className="text-3xl hover:text-[#01BD70]"
+                        onClick={() => setReviewForm({ ...reviewForm, rating: star.toString() })}
+                        className={`text-3xl transition ${
+                          parseInt(reviewForm.rating) >= star ? 'text-[#01BD70]' : 'text-gray-300'
+                        } hover:text-[#01BD70]`}
                       >
                         ⭐
                       </button>
@@ -732,6 +824,9 @@ export default function Home() {
                 <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Your Review</label>
                   <textarea
+                    required
+                    value={reviewForm.review}
+                    onChange={(e) => setReviewForm({ ...reviewForm, review: e.target.value })}
                     className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70] h-24"
                     placeholder="Share your experience with Julie!"
                   />
@@ -739,11 +834,17 @@ export default function Home() {
                 <p className="text-sm text-[#6B7280]">
                   Your review will be sent to Julie for approval before being posted.
                 </p>
+                {reviewMessage && (
+                  <p className={`text-center font-semibold ${reviewMessage.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                    {reviewMessage}
+                  </p>
+                )}
                 <button
                   type="submit"
-                  className="w-full px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase"
+                  disabled={reviewLoading}
+                  className="w-full px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit Review
+                  {reviewLoading ? 'Submitting...' : 'Submit Review'}
                 </button>
               </form>
             </div>
