@@ -83,6 +83,7 @@ export default function Home() {
     name: '',
     email: '',
     phone: '',
+    service: 'Boarding',
     message: '',
   })
   const [contactLoading, setContactLoading] = useState(false)
@@ -93,6 +94,7 @@ export default function Home() {
     name: '',
     email: '',
     rating: '5',
+    service: 'Boarding',
     review: '',
   })
   const [reviewLoading, setReviewLoading] = useState(false)
@@ -747,6 +749,19 @@ export default function Home() {
                   />
                 </div>
                 <div>
+                  <label className="block text-[#3A3A3A] font-bold mb-2">Service</label>
+                  <select
+                    value={contactForm.service}
+                    onChange={(e) => setContactForm({ ...contactForm, service: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
+                  >
+                    <option>Boarding</option>
+                    <option>Drop-in Visits</option>
+                    <option>Day Care</option>
+                    <option>Dog Walking</option>
+                  </select>
+                </div>
+                <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Message</label>
                   <textarea
                     required
@@ -820,6 +835,19 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
+                </div>
+                <div>
+                  <label className="block text-[#3A3A3A] font-bold mb-2">Service</label>
+                  <select
+                    value={reviewForm.service}
+                    onChange={(e) => setReviewForm({ ...reviewForm, service: e.target.value })}
+                    className="w-full px-4 py-2 border border-[#D1D5DB] rounded focus:outline-none focus:border-[#01BD70]"
+                  >
+                    <option>Boarding</option>
+                    <option>Drop-in Visits</option>
+                    <option>Day Care</option>
+                    <option>Dog Walking</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[#3A3A3A] font-bold mb-2">Your Review</label>
