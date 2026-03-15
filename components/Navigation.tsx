@@ -35,7 +35,7 @@ export default function Navigation() {
         {/* Logo/Brand */}
         <a
           href="#"
-          className="text-[#01BD70] font-bold text-xl uppercase"
+          className="text-[#3A3A3A] font-bold text-xl uppercase"
           onClick={(e) => {
             e.preventDefault()
             window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -48,7 +48,7 @@ export default function Navigation() {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-[#3A3A3A] font-bold"
+          className="md:hidden text-[#3A3A3A] font-bold text-3xl"
           onClick={() => setIsOpen(!isOpen)}
         >
           ☰
@@ -77,7 +77,7 @@ export default function Navigation() {
               key={link.name}
               href={link.href}
               onClick={handleNavClick}
-              className="block py-2 text-[#3A3A3A] font-semibold hover:text-[#01BD70] transition uppercase text-sm"
+              className="block py-2 text-[#3A3A3A] font-semibold hover:text-[#01BD70] transition uppercase text-sm border-b border-lightGray"
             >
               {link.name}
             </a>

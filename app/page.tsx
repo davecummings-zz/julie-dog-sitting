@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { services, reviews } from '@/lib/services'
-import { WalkingIcon } from '@/components/Icons'
+import { WalkingIcon, PhoneIcon, TargetIcon, PlayIcon, HugIcon, FoodIcon, HomeIcon, ShieldIcon, DayIcon } from '@/components/Icons'
 import Navigation from '@/components/Navigation'
 
 export default function Home() {
@@ -75,6 +75,8 @@ export default function Home() {
     daycare: true,
     walking: true,
   })
+
+  const [showCancellationModal, setShowCancellationModal] = useState(false)
 
   // Get availability for selected date
   const getDateKey = (date: Date) => {
@@ -175,7 +177,7 @@ export default function Home() {
       {/* About Julie Section */}
       <section id="about" className="py-20 bg-white px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">About Julie</h2>
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-12 text-center">About Julie</h2>
           
           {/* Julie's Photo - Centered */}
           <div className="flex justify-center mb-12">
@@ -196,10 +198,10 @@ export default function Home() {
             <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">
               Responsive, Reliable Pet Care
             </h3>
-            <p className="text-lg text-[#6B7280] mb-4 leading-relaxed">
+            <p className="text-lg text-[#3A3A3A] mb-4 leading-relaxed">
               Julie is a responsive sitter who delivers highly rated care and has a history of listing accurate availability and preferences, making it easier for pet parents to find the best care for their pets.
             </p>
-            <p className="text-lg text-[#6B7280] leading-relaxed">
+            <p className="text-lg text-[#3A3A3A] leading-relaxed">
               <strong className="text-[#3A3A3A]">Fresh air, long walks and attention</strong> are the foundation of our care philosophy. We've been caring for pets for years, and it's been a joy for our whole family.
             </p>
           </div>
@@ -209,46 +211,55 @@ export default function Home() {
             {/* Left Column: Communication & Skills */}
             <div className="space-y-6">
               <div className="bg-lightGray p-6 rounded-lg">
-                <h4 className="text-lg font-bold text-[#3A3A3A] mb-4 uppercase">📞 Communication</h4>
-                <ul className="text-[#6B7280] space-y-2">
-                  <li>✓ 7 repeat pet parents</li>
-                  <li>✓ 100% response rate</li>
-                  <li>✓ Usually responds in under an hour</li>
-                  <li>✓ 80% bookings with photo updates</li>
+                <h4 className="text-lg font-bold text-[#3A3A3A] mb-4 uppercase flex items-center gap-2">
+                  <PhoneIcon className="text-[#3A3A3A]" size={24} />
+                  Communication
+                </h4>
+                <ul className="text-[#3A3A3A] space-y-2">
+                  <li><span className="text-[#01BD70]">✓</span> 7 repeat pet parents</li>
+                  <li><span className="text-[#01BD70]">✓</span> 100% response rate</li>
+                  <li><span className="text-[#01BD70]">✓</span> Usually responds in under an hour</li>
+                  <li><span className="text-[#01BD70]">✓</span> 80% bookings with photo updates</li>
                 </ul>
               </div>
               <div className="bg-lightGray p-6 rounded-lg">
-                <h4 className="text-lg font-bold text-[#3A3A3A] mb-4 uppercase">🎯 Skills</h4>
-                <ul className="text-[#6B7280] space-y-2">
-                  <li>✓ 4 years of experience</li>
-                  <li>✓ Oral medication administration</li>
-                  <li>✓ Provides daily exercise</li>
-                  <li>✓ Special needs accommodation</li>
+                <h4 className="text-lg font-bold text-[#3A3A3A] mb-4 uppercase flex items-center gap-2">
+                  <TargetIcon className="text-[#3A3A3A]" size={24} />
+                  Skills
+                </h4>
+                <ul className="text-[#3A3A3A] space-y-2">
+                  <li><span className="text-[#01BD70]">✓</span> 4 years of experience</li>
+                  <li><span className="text-[#01BD70]">✓</span> Oral medication administration</li>
+                  <li><span className="text-[#01BD70]">✓</span> Provides daily exercise</li>
+                  <li><span className="text-[#01BD70]">✓</span> Special needs accommodation</li>
                 </ul>
               </div>
             </div>
 
             {/* Right Column: Typical Day */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-lg border-l-4 border-[#01BD70]">
-              <h3 className="text-xl font-bold text-[#3A3A3A] mb-6 uppercase">A Typical Day</h3>
-              <p className="text-[#6B7280] leading-relaxed mb-6">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-lg">
+              <h3 className="text-xl font-bold text-[#3A3A3A] mb-6 uppercase flex items-center gap-2">
+                <DayIcon className="" size={28} />
+                A Typical Day
+              </h3>
+              <p className="text-[#3A3A3A] font-bold leading-relaxed mb-6">
                 When your dog is here, your dog is family. Days are filled with:
               </p>
-              <ul className="space-y-3 text-[#6B7280]">
+              <ul className="space-y-3 text-[#3A3A3A]">
                 <li className="flex gap-3">
                   <WalkingIcon className="flex-shrink-0 w-6 h-6" size={24} />
                   <span>Walks around the block and in the nature preserve behind our home</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[#01BD70] font-bold">🎾</span>
+                  <PlayIcon className="flex-shrink-0 w-6 h-6" size={24} />
                   <span>Playing fetch in the yard and practicing skills</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[#01BD70] font-bold">🤗</span>
+                  <HugIcon className="flex-shrink-0 w-6 h-6" size={24} />
                   <span>Attention and snuggles as part of the package</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[#01BD70] font-bold">🍽️</span>
+                  <FoodIcon className="flex-shrink-0 w-6 h-6" size={24} />
                   <span>Regular meal times and potty breaks every 2-4 hours</span>
                 </li>
               </ul>
@@ -259,12 +270,15 @@ export default function Home() {
         
       <section id="availability" className="py-20 bg-lightGray px-4">
 
-        <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">Calendar Availability</h2>
+        <h2 className="text-3xl font-bold text-[#3A3A3A] mb-12 text-center">Availability</h2>
 
         <div className="max-w-6xl mx-auto">
           {/* Availability Calendar & Toggle */}
           <div className="mb-20 bg-white p-6 rounded-lg shadow">
-            
+
+            <h3 className="text-xl font-bold text-[#3A3A3A] mb-2 uppercase">Calendar</h3>
+            <p className="text-[#3A3A3A] mb-4">We're a homeschooling family so we are home throughout the day and available to care for your pet in our home or visit with a pet nearby.</p>
+
             {/* Selected Date Display */}
             <div className="text-center mb-6 p-4 bg-lightGray rounded">
               <p className="text-[#3A3A3A] font-bold uppercase">
@@ -337,7 +351,7 @@ export default function Home() {
           </div>
 
           {/* Services & Pricing Header */}
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">Services & Pricing</h2>
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-6 text-center">Services & Pricing</h2>
           <p className="text-center text-[#6B7280] mb-12 max-w-2xl mx-auto">
             Flexible pet care options to meet your needs
           </p>
@@ -347,9 +361,9 @@ export default function Home() {
             {services.map((service) => (
               <div key={service.id} className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-xl font-bold text-[#3A3A3A] mb-2 uppercase">{service.name}</h3>
-                <p className="text-[#6B7280] mb-4">{service.description}</p>
+                <p className="text-[#3A3A3A] mb-4">{service.description}</p>
                 <div className="bg-lightGray p-4 rounded mb-4">
-                  <div className="text-3xl font-bold text-[#01BD70]">
+                  <div className="text-2xl font-bold">
                     ${(service.basePrice / 100).toFixed(2)}
                   </div>
                   <div className="text-sm text-[#6B7280]">
@@ -378,8 +392,9 @@ export default function Home() {
       {/* Photo Gallery Section */}
       <section id="gallery" className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-12 text-center flex items-center justify-center gap-3">
             Dogs We've Loved
+            <WalkingIcon className="flex-shrink-0 w-6 h-6" size={24} />
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
             {images.slice(0, imagesToShow).map((image, i) => (
@@ -472,14 +487,17 @@ export default function Home() {
       {/* Home & Environment Section */}
       <section id="pet-care" className="py-20 bg-lightGray px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-12 text-center">
             Safety, Trust & Environment
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white p-8 rounded-lg shadow">
-              <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">🏡 Home Details</h3>
-              <ul className="space-y-3 text-[#6B7280]">
+              <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase flex items-center gap-2">
+                <HomeIcon className="text-[#3A3A3A]" size={28} />
+                Home Details
+              </h3>
+              <ul className="space-y-3 text-[#3A3A3A]">
                 <li className="flex gap-3">
                   <span className="text-[#01BD70]">✓</span>
                   <span><strong>House</strong> with plenty of space</span>
@@ -508,8 +526,11 @@ export default function Home() {
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow">
-              <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">🛡️ Care Standards</h3>
-              <ul className="space-y-3 text-[#6B7280]">
+              <h3 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase flex items-center gap-2">
+                <ShieldIcon className="text-[#3A3A3A]" size={28} />
+                Care Standards
+              </h3>
+              <ul className="space-y-3 text-[#3A3A3A]">
                 <li className="flex gap-3">
                   <span className="text-[#01BD70]">✓</span>
                   <span><strong>Potty breaks</strong> every 2-4 hours</span>
@@ -543,7 +564,7 @@ export default function Home() {
       {/* Reviews Section */}
       <section id="reviews" className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-12 text-center">
             What Pet Parents Say
           </h2>
           {/* Reviews Carousel */}
@@ -606,7 +627,7 @@ export default function Home() {
       {/* Contact & Review Submission Section */}
       <section id="contact" className="py-20 bg-lightGray px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-12 uppercase text-center">
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-12 text-center">
             Get in Touch
           </h2>
 
@@ -653,6 +674,13 @@ export default function Home() {
                   className="w-full px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase"
                 >
                   Send Inquiry
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCancellationModal(true)}
+                  className="hover:underline transition mb-4 font-semibold"
+                >
+                  Boarding Cancellation Policy
                 </button>
               </form>
             </div>
@@ -726,10 +754,10 @@ export default function Home() {
       {/* Map Section */}
       <section id="location" className="py-20 bg-white px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-[#3A3A3A] mb-6 uppercase text-center">
+          <h2 className="text-3xl font-bold text-[#3A3A3A] mb-6 text-center">
             Location
           </h2>
-          <p className="text-center text-[#6B7280] mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-[#3A3A3A] mb-12 max-w-2xl mx-auto">
             Service area centered in Georgetown, Massachusetts. Exact address provided upon booking.
           </p>
           <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg">
@@ -748,6 +776,46 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      {/* Cancellation Policy Modal */}
+      {showCancellationModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowCancellationModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-[#3A3A3A] mb-6 uppercase">Cancellation Policy</h2>
+              
+              <div className="space-y-4 text-[#6B7280] leading-relaxed">
+                <div>
+                  <h3 className="text-lg font-bold text-[#3A3A3A] mb-3">Boarding: One Day</h3>
+                  <p className="mb-4">
+                    A full refund is available if cancelled by 12:00pm the day before the service begins. 12:00pm is determined by the sitter's time zone.
+                  </p>
+                  <p className="mb-4">
+                    If cancelled later than 12:00pm the day before the service begins, a 50% refund is available for the first 7 cancelled calendar days from the cancellation request date.
+                  </p>
+                  <p>
+                    A 100% refund is available for any additional days.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowCancellationModal(false)}
+                className="mt-8 block mx-auto px-8 py-3 bg-[#01BD70] text-white font-bold hover:bg-[#00a85f] transition uppercase"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
